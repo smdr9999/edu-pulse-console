@@ -14,7 +14,215 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          description: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          description: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          description?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          attendance_date: string
+          course_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          status: string
+          student_id: string | null
+        }
+        Insert: {
+          attendance_date: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status: string
+          student_id?: string | null
+        }
+        Update: {
+          attendance_date?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          course_code: string
+          course_name: string
+          created_at: string | null
+          credits: number | null
+          description: string | null
+          grade_level: string
+          id: string
+          status: string | null
+          teacher_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          course_code: string
+          course_name: string
+          created_at?: string | null
+          credits?: number | null
+          description?: string | null
+          grade_level: string
+          id?: string
+          status?: string | null
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          course_code?: string
+          course_name?: string
+          created_at?: string | null
+          credits?: number | null
+          description?: string | null
+          grade_level?: string
+          id?: string
+          status?: string | null
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          created_at: string | null
+          date_of_birth: string | null
+          email: string
+          enrollment_date: string | null
+          first_name: string
+          grade_level: string
+          id: string
+          last_name: string
+          phone: string | null
+          status: string | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          email: string
+          enrollment_date?: string | null
+          first_name: string
+          grade_level: string
+          id?: string
+          last_name: string
+          phone?: string | null
+          status?: string | null
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string
+          enrollment_date?: string | null
+          first_name?: string
+          grade_level?: string
+          id?: string
+          last_name?: string
+          phone?: string | null
+          status?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      teachers: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          email: string
+          first_name: string
+          hire_date: string | null
+          id: string
+          last_name: string
+          phone: string | null
+          status: string | null
+          subject: string | null
+          teacher_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          department?: string | null
+          email: string
+          first_name: string
+          hire_date?: string | null
+          id?: string
+          last_name: string
+          phone?: string | null
+          status?: string | null
+          subject?: string | null
+          teacher_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          department?: string | null
+          email?: string
+          first_name?: string
+          hire_date?: string | null
+          id?: string
+          last_name?: string
+          phone?: string | null
+          status?: string | null
+          subject?: string | null
+          teacher_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
