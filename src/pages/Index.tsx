@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
@@ -7,6 +7,7 @@ import { NotificationDemo } from "@/components/dashboard/NotificationDemo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Users, 
   GraduationCap, 
@@ -18,7 +19,55 @@ import {
 } from "lucide-react";
 
 const Index = () => {
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeTeachers: 0,
+    totalCourses: 0,
+    attendanceRate: "0%"
+  });
+
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [studentsResult, teachersResult, coursesResult, attendanceResult] = await Promise.all([
+          supabase.from('students').select('*', { count: 'exact' }),
+          supabase.from('teachers').select('*', { count: 'exact' }),
+          supabase.from('courses').select('*', { count: 'exact' }),
+          supabase.from('attendance').select('*')
+        ]);
+
+        const totalStudents = studentsResult.count || 0;
+        const activeTeachers = teachersResult.count || 0;
+        const totalCourses = coursesResult.count || 0;
+        
+        // Calculate attendance rate
+        const attendanceData = attendanceResult.data || [];
+        const presentCount = attendanceData.filter(a => a.status === 'present').length;
+        const attendanceRate = attendanceData.length > 0 
+          ? `${((presentCount / attendanceData.length) * 100).toFixed(1)}%`
+          : "0%";
+
+        setStats({
+          totalStudents,
+          activeTeachers,
+          totalCourses,
+          attendanceRate
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard statistics",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
     // Register service worker for PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -67,27 +116,27 @@ const Index = () => {
     };
   }, []);
 
-  const stats = [
+  const statsCards = [
     {
       title: "Total Students",
-      value: "1,234",
+      value: loading ? "..." : stats.totalStudents.toString(),
       change: "+12%",
       changeType: "positive" as const,
       icon: Users,
-      description: "vs last month",
+      description: "active students",
       gradient: true
     },
     {
       title: "Active Teachers",
-      value: "89",
+      value: loading ? "..." : stats.activeTeachers.toString(),
       change: "+3",
       changeType: "positive" as const,
       icon: GraduationCap,
-      description: "new this month"
+      description: "teaching staff"
     },
     {
       title: "Courses",
-      value: "24",
+      value: loading ? "..." : stats.totalCourses.toString(),
       change: "0",
       changeType: "neutral" as const,
       icon: BookOpen,
@@ -95,7 +144,7 @@ const Index = () => {
     },
     {
       title: "Attendance Rate",
-      value: "94.2%",
+      value: loading ? "..." : stats.attendanceRate,
       change: "+2.1%",
       changeType: "positive" as const,
       icon: TrendingUp,
@@ -116,7 +165,7 @@ const Index = () => {
 
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat, index) => (
+          {statsCards.map((stat, index) => (
             <div 
               key={stat.title}
               className="animate-bounce-in"
